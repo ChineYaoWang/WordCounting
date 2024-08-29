@@ -17,6 +17,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <sstream>
+#include <atomic>
 using namespace std;
 
 string receivefolder = "received_files";
@@ -140,17 +141,34 @@ void receivefile(int socket){
 	}
 	return;
 }
+// unordered_map<thread::id,int> threadtoidx;
+// atomic<int> t = -1;
+// vector<pair<int,double>> d;  // task,time
 void FileReading_mul(string &filename){
 	ifstream file(filename);
 	string line;
 	string str;
 	thread::id curr_thread_idx = this_thread::get_id();
+	// if(!threadtoidx.count(curr_thread_idx)){
+	// 	t++;
+	// 	threadtoidx[curr_thread_idx] = t;
+	// 	d.push_back(pair<int,double>{0,0});
+	// }
+	// double time_used;
+	// timeval start, end;
+	// gettimeofday(&start,NULL);
 	while(getline(file,line)){
 		stringstream ss(line);
 		while(getline(ss,str,' ')){
 			wordscount[curr_thread_idx][str]++;
 		}
 	}
+	// gettimeofday(&end,NULL);
+	// // Cal total time
+	// time_used = (end.tv_sec -start.tv_sec)*1e6;
+	// time_used = (time_used + (end.tv_usec -start.tv_usec))*1e-6;
+	// d[threadtoidx[curr_thread_idx]].first++;
+	// d[threadtoidx[curr_thread_idx]].second+=time_used;
 	return;
 }
 void FileReading_single(string &filename){
@@ -202,7 +220,7 @@ pair<double,double> HashTable_approach(){
 	// Cal total time
 	time_used = (end.tv_sec -start.tv_sec)*1e6;
 	time_used = (time_used + (end.tv_usec -start.tv_usec))*1e-6;
-	// cout<<"Time taken with out thread: "<< time_used<<endl;
+
 
 	// 8 threads
 	double time_used_thread;
@@ -214,7 +232,6 @@ pair<double,double> HashTable_approach(){
 	// Cal total time
 	time_used_thread = (end.tv_sec -start.tv_sec)*1e6;
 	time_used_thread = (time_used_thread + (end.tv_usec -start.tv_usec))*1e-6;
-	// cout<<"Time taken with thread: "<< time_used<<endl;
 	
 	return {time_used,time_used_thread};
 }
@@ -245,33 +262,51 @@ int main(int argc,char *argv[]){
 
 	const int test_number = 1;
 
-	// method 1 :using hash table
-	double avg_time = 0,avg_time_thread= 0;
-	int diff = 0;
-	for(int i=0;i<test_number;i++){
-		wordscount_nothread.clear();
-		wordscount.clear();
-		pair<double,double> time = HashTable_approach();
-		avg_time+=time.first;
-		avg_time_thread+=time.second;
+	// This part is for testing and analyzing
+	// double avg_time = 0,avg_time_thread= 0;
+	// int diff = 0;
+	// for(int i=0;i<test_number;i++){
+	// 	wordscount_nothread.clear();
+	// 	wordscount.clear();
+	// 	pair<double,double> time = HashTable_approach();
+	// 	avg_time+=time.first;
+	// 	avg_time_thread+=time.second;
 		 
-		// merge counts from threads
-		unordered_map<string,int> total_merge_thread;
-		for(auto &v:wordscount){
-			for(auto &p:v.second){
-				total_merge_thread[p.first]+=p.second;
-			}
-		}
-		// output 
-		for(auto&v:total_merge_thread){
-			// cout<<v.first<<": "<<v.second<<endl;
-			diff+=(abs(v.second-wordscount_nothread[v.first]));
+	// 	// merge counts from threads
+	// 	unordered_map<string,int> total_merge_thread;
+	// 	for(auto &v:wordscount){
+	// 		for(auto &p:v.second){
+	// 			total_merge_thread[p.first]+=p.second;
+	// 		}
+	// 	}
+	// 	// output 
+	// 	for(auto&v:total_merge_thread){
+	// 		// cout<<v.first<<": "<<v.second<<endl;
+	// 		diff+=(abs(v.second-wordscount_nothread[v.first]));
+	// 	}
+	// }
+	// avg_time/=test_number;
+	// avg_time_thread/=test_number;
+	// cout<<"Hashtable method: Avg Time Without Thread: "<<avg_time<<" seconds"<<endl;
+	// cout<<"Hashtable method: Avg Time With Thread: "<<avg_time_thread<<" seconds"<<endl;
+	// cout<<"Diff: "<<diff<<endl;
+	////////////////////////////////////////////////////////////////////
+	HashTable_approach();
+	unordered_map<string,int> total_merge_thread;
+	for(auto &v:wordscount){
+		for(auto &p:v.second){
+			total_merge_thread[p.first]+=p.second;
 		}
 	}
-	avg_time/=test_number;
-	avg_time_thread/=test_number;
-	cout<<"Hashtable method: Avg Time Without Thread: "<<avg_time<<" seconds"<<endl;
-	cout<<"Hashtable method: Avg Time With Thread: "<<avg_time_thread<<" seconds"<<endl;
-	cout<<"Diff: "<<diff<<endl;
+	//output 
+	for(auto&v:total_merge_thread){
+		cout<<v.first<<": "<<v.second<<endl;
+	}
+
+	// thread loading
+	// for(int i=0;i<8;i++){
+	// 	cout<<"Thread "<<i<<": "<<d[i].first<<" in "<<d[i].second<<" Avg: "<<
+	// 	d[i].second/d[i].first<<" Load: "<<((double)d[i].first)/62*100<<"%"<<endl;
+	// }
 	return 0;
 }

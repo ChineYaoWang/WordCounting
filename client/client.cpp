@@ -14,12 +14,12 @@
 using namespace std;
 
 using namespace std::chrono_literals;
-string root_file = "../directory_big50000_depth5";
+// string root_file = "../directory_big50000_depth5";
 // string root_file = "../directory_big50000_depth4";
 // string root_file = "../directory_big50000_depth3";
 // string root_file = "../directory_big50000";
 // string root_file = "../directory_big5000";
-// string root_file = "../directory_big";
+string root_file = "../directory_big";
 // string root_file = "../directory_big50";
 using recursive_directory_iterator = std::filesystem::recursive_directory_iterator;
 
@@ -68,7 +68,7 @@ void FileSearching(int &socket,time_t &timestamp){
 			if(isHiddenFile(dirEntry.path())) continue;
 			auto const modified_file_time = filesystem::last_write_time(dirEntry);
 			time_t  modified_ctime = file_time_to_ttime(modified_file_time);
-			if(modified_ctime <= timestamp){
+			if(modified_ctime >= timestamp){
 				sendFile(socket,dirEntry.path().string());
 				// Wait for "READY" signal from the server
 				char ready[6];
