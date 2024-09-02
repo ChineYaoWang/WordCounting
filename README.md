@@ -1,6 +1,6 @@
 # WordCounting
 #Task Description
-- nWe have a directory with the path ./directory_big that contains subdirectories and files at varying depths. Each directory and its subdirectories have a property called rctime, which represents the most recent modification time of any file within that directory or its subdirectories.
+- We have a directory with the path ./directory_big that contains subdirectories and files at varying depths. Each directory and its subdirectories have a property called rctime, which represents the most recent modification time of any file within that directory or its subdirectories.
 
 #Objective
 - Identify Modified Files: Given a specific timestamp, quickly find all files within the directory structure that have been modified after this timestamp.
